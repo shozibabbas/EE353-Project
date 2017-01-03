@@ -5,6 +5,7 @@ from array import *
 from threading import Thread
 from time import sleep
 from socket import *
+import djikstra
 
 allRoutersDict = {}
 ackDict = {}
@@ -44,8 +45,27 @@ def server(*args):
 	    if not (allRoutersDict.has_key((router[0], router[1])) or allRoutersDict.has_key((router[1], router[0]))):
 		allRoutersDict.setdefault(router, iRouterDict[router])
 	sleep(1)	
-	print allRoutersDict
 	    
+def djikstraShortestPath():
+    while(1):
+	sleep(30)
+	edgeNodes = []
+	for key in allRoutersDict:
+	    fromNode = ""
+	    toNode = ""
+	    path = 0.0
+	    fromNode = key[0]
+	    toNode = key[1]
+	    path = allRoutersDict[key]
+	    
+	    s = (fromNode, toNode, path)
+	    edgeNodes.append(s)
+	    	
+	print djikstra.dijkstra(edgeNodes, "A", "E")
+	
+	
+    return True
+
 
 if __name__ == "__main__":
    
@@ -77,7 +97,11 @@ if __name__ == "__main__":
     
     thread1 = Thread(target = server, args = [routerPortNumber, routersPort, routerId])
     thread2 = Thread(target = client, args = [routerId, routersPath, routersPort])
+    thread3 = Thread(target = djikstraShortestPath)
     thread1.start()
     thread2.start()
+    thread3.start()
     thread1.join()
     thread2.join()
+    thread3.join()
+

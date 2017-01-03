@@ -22,21 +22,7 @@ def client(*args):
 	    portNumber = allroutersPort[port]
 	    address = ("127.0.0.1", int(portNumber))
 	    clientSocket.sendto(pickle.dumps(routersInfo),address)
-		#for key in allRoutersDict.keys:
-		    # port in key:
-			#del allRoutersDict[key]
-		    #True
-	# receive ACK
 	sleep(1)
-
-
-def countCheck():
-    while(1):
-	
-	sleep(1)
-    return True
-
-
 
 def server(*args):
     portNumber = args[0]
@@ -53,12 +39,6 @@ def server(*args):
 	    
 	iRouterId = incomingRouterInfo[0]
 	iRouterDict = incomingRouterInfo[1]
-		
-	for key in ackDict:
-	    ackDict[key] = ackDict[key] + 1
-	#print ackDict	
-		
-	ackDict[iRouterId] = 0
 		
 	for router in iRouterDict:
 	    if not (allRoutersDict.has_key((router[0], router[1])) or allRoutersDict.has_key((router[1], router[0]))):
@@ -97,9 +77,7 @@ if __name__ == "__main__":
     
     thread1 = Thread(target = server, args = [routerPortNumber, routersPort, routerId])
     thread2 = Thread(target = client, args = [routerId, routersPath, routersPort])
-    #thread3 = Thread(target = countCheck) 
     thread1.start()
     thread2.start()
     thread1.join()
     thread2.join()
-    #thread3.start()   

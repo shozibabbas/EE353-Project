@@ -30,30 +30,40 @@ def client(*args):
 	sleep(1)
 
 
-def sendAck(args):
+def sendAck(arg, arg2):
     clientSocket = socket(AF_INET, SOCK_DGRAM) 
-    message = raw_input(200) 
-    clientSocket.sendto(message,args)     
-    return true
+    message = [arg2, 200]
+    message = pickle.dumps(message) 
+    if(clientSocket.sendto(message,arg)):
+	print arg
+    return True
 
 
 
 def server(*args):
     portNumber = args[0]
     routersPort = args[1]
+    routerId = args[2]
         
     serverSocket=socket(AF_INET,SOCK_DGRAM)
     serverSocket.bind(("127.0.0.1",int(portNumber)))
 
     while(1):
 	message,addr = serverSocket.recvfrom(4096)
-	addr
-	if(message == 200):
-	    True
+	
+	incomingRouterInfo = pickle.loads(message) 
+	
+	if(incomingRouterInfo[1] == 200):
+	    if(ackDict.has_key(incomingRouterInfo[0])):
+		ackDict[incomingRouterInfo[0]] = 0
+	    else:
+		ackDict.setdefault(incomingRouterInfo[0], 0)
 	else:
-	    incomingRouterInfo = pickle.loads(message)    	
+	    cAddr = (addr[0], routersPort[incomingRouterInfo[0]])
+	    sendAck(cAddr, routerId)
 	    
-	    sendAck(addr)
+	    for key in ackDict:
+		ackDict[key] = ackDict[key] + 1
 	    
 	    iRouterId = incomingRouterInfo[0]
 	    iRouterDict = incomingRouterInfo[1]
@@ -62,7 +72,8 @@ def server(*args):
 		if not (allRoutersDict.has_key((router[0], router[1])) or allRoutersDict.has_key((router[1], router[0]))):
 		    allRoutersDict.setdefault(router, iRouterDict[router])
 		
-	    print allRoutersDict
+	#print allRoutersDict
+	print ackDict
 	    
 
 if __name__ == "__main__":
@@ -92,7 +103,7 @@ if __name__ == "__main__":
 
     print "server: current dict = ", allRoutersDict
     
-    thread1 = Thread(target = server, args = [routerPortNumber, routersPort])
+    thread1 = Thread(target = server, args = [routerPortNumber, routersPort, routerId])
     thread2 = Thread(target = client, args = [routerId, routersPath, routersPort])
     thread1.start()
     thread2.start()
